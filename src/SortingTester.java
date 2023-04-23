@@ -14,8 +14,6 @@ public class SortingTester {
         }
     }
 
-
-
     public static void main(String[] args) {
         float[][] warmup = new float[WARMUP_ITERATIONS][ARRAY_SIZE];
         float[][] test = new float[TEST_ITERATIONS][ARRAY_SIZE];

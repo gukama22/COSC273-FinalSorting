@@ -1,0 +1,46 @@
+// use merge sort to recursively sort the values of a between
+    // indices i (inclusive) and k (exclusive)
+    private static void mergeSort(float[] a, int i, int k) {
+        if (k - i == 1) {
+            return;
+        }
+        int j = i + (k - i) / 2;
+        mergeSort(a, i, j);
+        mergeSort(a, j, k);
+        merge(a, i, j, k);
+    }
+
+    // merge the two sub-arrays of a between indices i and j and
+    // indices j and k
+    // if indices i to j and j to k were previously
+    // sorted, after this operation indices i through k will be sorted
+    private static void merge(float[] a, int i, int j, int k) {
+        float [] merged = new float[k - i];
+        int ind = 0;
+        int left = i;
+        int right = j;
+        while (left < j && right < k) {
+            if (a[left] <= a[right]) {
+                merged[ind] = a[left];
+                left++;
+            }
+            else {
+                merged[ind] = a[right];
+                right++;
+            }
+            ind++;
+        }
+        while (left < j) {
+            merged[ind] = a[left];
+            left++;
+            ind++;
+        }
+        while (right < k) {
+            merged[ind] = a[right];
+            right++;
+            ind++;
+        }
+        for (ind = i; ind < k; ind++) {
+            a[ind] = merged[ind - i];
+        }
+    }
