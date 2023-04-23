@@ -9,6 +9,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * Baseline: 4544 ms
  * QuickSort: 9559 ms
  * MergeSort: 10037 ms
+ *
+ * ForkJoin Pool 01: 13941 ms
+ * 23 April (3:41 PM) Sike
  */
 
 public class Sorting {
@@ -30,49 +33,14 @@ public class Sorting {
      * @param data the array of doubles to be sorted
      */
     public static void parallelSort (float[] data) {
-        quickSort(data, 0, data.length - 1, new Random());
+        ForkJoinPool pool = new ForkJoinPool();
+        pool.invoke(new QuickSortTask(data));
+        // quickSort(data, 0, data.length - 1, new Random());
         /// mergeSort(data, 0, data.length);
         // baselineSort(data);
     }
 
-    private static void quickSort(float[] a, int i, int j, Random r) {
-        if (j <= i) {
-            return;
-        }
-        int p = i + r.nextInt(j-i);
-        int m = split(a, i, j, p);
-        quickSort(a, i, m-1, r);
-        quickSort(a, m+1, j, r);
-    }
 
-
-    // Split the array between indices i and j according to the pivot
-    // index p. After this operation, the index m is returned such
-    // that all values at indices i..m-1 are <= pivot, a[m] = pivot,
-    // and all values at indices m+1...j are > pivot
-    public static int split(float[] a, int i, int j, int pIndex) {
-        float pivot = a[pIndex];
-        // move pivot to right-most index
-        swap(a, pIndex, j);
-        // the largest index of values <= pivot
-        int small = i - 1;
-        // values between small and cur are > pivot
-        for (int cur = i; cur <= j; cur++) {
-            if (a[cur] <= pivot) {
-                small++;
-                swap(a,small,cur);
-            }
-        }
-        // return the index of the pivot
-        return small;
-    }
-
-    // swap two elements in an array
-    private static void swap(float[] a, int i, int j) {
-        float x = a[j];
-        a[j] = a[i];
-        a[i] = x;
-    }
 
     /**
      * Determines if an array of doubles is sorted in increasing order.
