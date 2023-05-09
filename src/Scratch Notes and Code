@@ -1,3 +1,44 @@
+@SuppressWarnings("all");
+
+** Timing Notes:
+ * Baseline: 4_544 ms
+ * QuickSort: 9_559 ms
+ * MergeSort: 10_037 ms
+ *
+ * ForkJoin Pool 01: 13_941 ms
+ * 23 April (3:41 PM) Sike
+ *
+ *  ForkJoin Pool 02: 161_431 ms
+ *  left.compute() and right.fork()
+ *  23 April (4:05 PM) Sike
+ *
+ *  ForkJoin Pool 03: did not complete
+ *  left.compute() and right.fork() + base case of array length = 100
+ *  23 April (4:10 PM) Sike
+ *
+ *  Arrays.parallelSort(): 3_214ms
+ *  23 April (4:18 PM) Sike
+
+
+
+
+
+BASE CASE IDEAS
+Arrays.sort()
+insertion sort
+selection sort
+bubble sort???
+two base cases: Arrays.sort() + small sort?
+
+
+        // ... Old Trials ...
+        // Arrays.parallelSort(data);
+        // quickSort(data, 0, data.length - 1, new Random());
+        // mergeSort(data, 0, data.length); /
+        //  baselineSort(data);
+
+
+MERGESORT CODE
 // use merge sort to recursively sort the values of a between
     // indices i (inclusive) and k (exclusive)
     private static void mergeSort(float[] a, int i, int k) {
@@ -43,4 +84,151 @@
         for (ind = i; ind < k; ind++) {
             a[ind] = merged[ind - i];
         }
+    }
+
+
+            if (j - i <= 1) {
+               /// if (j - i == 1500) System.out.println("base case reached");
+                // Arrays.sort(data);
+                System.out.println("end!");
+                return;
+            }
+
+            // // Picking two pivots via the median of three method.
+            int[] pivot = new int[2];
+            for (int i = 0; i < 2; i++) {
+                int a = rand.nextInt(j-i);
+                int b = rand.nextInt(j-i);
+                int c = rand.nextInt(j-i);
+                int pRand;
+                // Checking for b
+                if ((a < b && b < c) || (c < b && b < a)) pRand = b;
+                    // Checking for a
+                else if ((b < a && a < c) || (c < a && a < b)) pRand = a;
+                else pRand = c;
+                pivot[i]  = i + pRand;
+            }
+
+            int[] m;
+            if (pivot[0] < pivot[1]) m = split(data, i, j, pivot[0], pivot[1]);
+            else m = split(data, i, j, pivot[1], pivot[0]);
+
+ public static int[] split(float[] a, int i, int j, int low, int high) {
+        float pivotOne = a[low];
+        float pivotTwo = a[high];
+
+        if (pivotOne > pivotTwo) {
+            swap(a, low, high);
+            pivotOne = a[low];
+            pivotTwo = a[high];
+        }
+
+        System.out.println();
+        System.out.println("p1 " + pivotOne + " p2 " + pivotTwo);
+
+        // move pivots to right-most and left-most indices
+        swap(a, high, j);
+        swap(a, low, i);
+
+        System.out.println("swapped left and right indices");
+        for (int x = 0; x < 10; x++) System.out.print(a[x] + " ");
+
+        // the largest index of values <= pivotOne
+        int small = i - 1;
+        // the smallest index of values >= pivotTwo
+        int large = j + 1;
+
+        System.out.println("\noriginal small and large " + small + " " + large);
+
+        // iterate through the array
+        for (int cur = i; cur <= j; cur++) {
+            // values between small and cur are > pivotOne
+            if (a[cur] < pivotTwo && a[cur] > pivotOne) {System.out.println("do nothing to " + a[cur]);}
+            else if (a[cur] <= pivotOne) {
+                small++;
+                System.out.println("\nmoving " + a[cur] + " to the first quad at index " + small);
+                swap(a,small,cur);
+                for (int x = 0; x < 10; x++) System.out.print(a[x] + " ");
+            }
+            // values between cur and large are < pivotTwo
+            else if (a[cur] >= pivotTwo) {
+                large--;
+                System.out.println("\nmoving " + a[cur] + " to the last quad at index " + large);
+                swap(a,large,cur);
+                for (int x = 0; x < 10; x++) System.out.print(a[x] + " ");
+            }
+        }
+
+        System.out.println("\nJust did the split");
+        for (int x = 0; x < 10; x++) System.out.print(a[x] + " ");
+
+        //System.out.println();
+        System.out.println("\nfinal small and large " + small + " " + large);
+
+        // Return the indices of the pivots
+        return new int[]{small, large};
+    }
+
+
+    public static int split(float[] a, int i, int j, int pIndex) {
+
+        float pivot = a[pIndex];
+        System.out.println();
+        System.out.println("p " + pivot);
+
+//        System.out.println("swapped pivot and right elt");
+//        for (int x = 0; x < 10; x++) System.out.print(a[x] + " ");
+//        // move pivot to right-most index
+//        swap(a, pIndex, j);
+
+        // the largest index of values <= pivot
+        int small = i - 1;
+        System.out.println("\noriginal small " + small);
+
+        // values between small and cur are > pivot
+        for (int cur = i; cur <= j; cur++) {
+            if (a[cur] <= pivot) {
+                small++;
+                System.out.println("\nmoving " + a[cur] + " to the index " + small);
+                swap(a,small,cur);
+                for (int x = 0; x < 10; x++) System.out.print(a[x] + " ");
+            }
+        }
+
+        // return the index of the pivot
+        System.out.println("\nfinal small " + small);
+        return small;
+    }
+
+
+    /** Swap two elements in an array
+     * @param a the input float array
+     * @param i an index whose value is to be swapped
+     * @param j an index whose value is to be swapped
+     */
+    private static void swap(float[] a, int i, int j) {
+        float x = a[j];
+        a[j] = a[i];
+        a[i] = x;
+    }
+
+float[] arr = {9.0F, 5.0F, 2.0F, 7.0F, 1.0F, 4.0F, 6.0F, 0.0F, 3.0F, 8.0F};
+split(arr, 0, 9, 2, 9 );
+split(arr, 0, 9, 4);
+System.out.println("ignore");
+
+    /**
+     * Determines if an array of doubles is sorted in increasing order.
+     * @param data the array to check for sorted-ness
+     * @return `true` if the array is sorted, and `false` otherwise
+     */
+    public static boolean isSorted (float[] data) {
+        double prev = data[0];
+        for (int i = 1; i < data.length; ++i) {
+            if (data[i] < prev) {
+                return false;
+            }
+            prev = data[i];
+        }
+        return true;
     }

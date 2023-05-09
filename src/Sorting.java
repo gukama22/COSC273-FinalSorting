@@ -1,22 +1,12 @@
 import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Notes:
- * Baseline: 4544 ms
- * QuickSort: 9559 ms
- * MergeSort: 10037 ms
- *
- * ForkJoin Pool 01: 13941 ms
- * 23 April (3:41 PM) Sike
+ * @author Lynca Kaminka and Sike Ogieva
  */
 
 public class Sorting {
-    // Named after Grace Hopper, pioneer of Computing
-    public static final String TEAM_NAME = "hopper";
+    public static final String TEAM_NAME = "Sunny-Day";
 
     /**
      * Sorts an array of doubles in increasing order. This method is a
@@ -33,14 +23,9 @@ public class Sorting {
      * @param data the array of doubles to be sorted
      */
     public static void parallelSort (float[] data) {
-        ForkJoinPool pool = new ForkJoinPool();
-        pool.invoke(new QuickSortTask(data));
-        // quickSort(data, 0, data.length - 1, new Random());
-        /// mergeSort(data, 0, data.length);
-        // baselineSort(data);
+         ForkJoinPool pool = new ForkJoinPool();
+         pool.invoke(new QuickSortTask(data, 0, data.length - 1));
     }
-
-
 
     /**
      * Determines if an array of doubles is sorted in increasing order.

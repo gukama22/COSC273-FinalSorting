@@ -1,0 +1,63 @@
+SPEEDING UP THE SORTING TASK
+Parallel Computing, Spring 2023
+Authors: Lynca Kaminka and Sike Ogieva
+Team: Sunny-Day
+Best Cluster Time: 8_150ms
+
+1. The Sorting Algorithm.
+We use a dual-pivot quicksort, which is the default Java 7+ sorting algorithm.
+Our implementation was adapted from Gourish Sandu's work on GeeksForGeeks, and
+works by splitting the array into three partitions using two pivots --
+one from the left end and one from the right,
+then recursively dual-pivot quick-sorting each until we hit a base case.
+It has an asymptotic complexity of O(NlogN), including on certain datasets that would
+cause the classic quicksort to degrade to quadratic performance.
+The adapted program was commented on by us, to indicate our understanding.
+
+
+2. The Base Case
+The base case of this recursive algorithm is an array size of 500_000 elements.
+Base case arrays of sizes 100 to 1_000_000 were tested on the cluster
+to arrive at this optimal number.
+
+
+3. Parallelism
+Multithreading was achieved using ForkJoin Pools.
+ForkJoinPool is a built-in thread pool implementation in Java that is designed
+to efficiently execute tasks that can be split into smaller subtasks and run in parallel.
+It uses the fork-join model, which is a programming paradigm that allows tasks
+to be recursively divided into smaller subtasks until they are small enough
+to be executed independently in parallel.
+One key feature of ForkJoinPool is the ability to implement a work-stealing algorithm.
+In this algorithm, if a thread is idle, it can "steal" a subtask from another thread's queue to execute.
+This helps to balance the workload across the threads and improve the overall performance of the pool.
+
+4. Task.Fork Versus Task.Compute
+We tested various combinations of subtask.fork() and subtask.compute()
+>> left.compute(), mid.compute(), right.compute()
+>> left.fork(), mid.fork(), right.fork()
+>> left.compute(), mid.compute(), right.fork()
+>> left.fork(), mid.fork(), right.compute()
+e.t.c
+Contrary to what we would have predicted from theory, the branching method that gave the
+best performance was not any combination of fork and compute, but the consistent, exclusive use of compute
+
+** Timing Notes On My Machine
+ * Baseline: 4_544 ms
+ * QuickSort: 9_559 ms
+ * MergeSort: 10_037 ms
+ *
+ * ForkJoin Pool 01: 13_941 ms
+ * 23 April (3:41 PM)
+ *
+ *  ForkJoin Pool 02: 161_431 ms
+ *  left.compute() and right.fork()
+ *  23 April (4:05 PM)
+ *
+ *  ForkJoin Pool 03: did not complete
+ *  left.compute() and right.fork() + base case of array length = 100
+ *  23 April (4:10 PM)
+ *
+ *  Arrays.parallelSort(): 3_214ms
+ *  23 April (4:18 PM)
+ *

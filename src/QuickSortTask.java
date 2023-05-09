@@ -1,53 +1,111 @@
-import java.util.Random;
+import java.util.Arrays;
 import java.util.concurrent.RecursiveAction;
+
+/**
+ * @author Lynca Kaminka and Sike Ogieva
+ * May 2023
+ */
 
 public class QuickSortTask extends RecursiveAction {
     float[] data;
+    int i;
+    int j;
 
-    public QuickSortTask(float[] d) {
+    public QuickSortTask(float[] d, int start, int end) {
         data = d;
+        i = start;
+        j = end;
     }
 
     @Override
     protected void compute() {
-        quickSort(data, 0, data.length - 1, new Random());
-    }
-
-    private static void quickSort(float[] a, int i, int j, Random r) {
-        if (j <= i) {
+        // for smaller arrays
+        if (j - i <= 500_000) {
+            Arrays.sort(data, i, j + 1);
             return;
         }
-        int p = i + r.nextInt(j-i);
-        int m = split(a, i, j, p);
-        quickSort(a, i, m-1, r);
-        quickSort(a, m+1, j, r);
+
+       // for larger arrays
+       if (j > i) {
+            // piv[0] = left pivot and piv[1] = right pivot
+            int[] piv;
+            // splits the array into three partitions with two pivots
+            piv = split(data, i, j);
+
+            // recursively sort each of the three partitions
+            QuickSortTask left = new QuickSortTask(data, i, piv[0] - 1);
+            QuickSortTask middle = new QuickSortTask(data, piv[0] + 1, piv[1] - 1);
+            QuickSortTask right = new QuickSortTask(data, piv[1] + 1, j);
+
+          //found to be faster than any combination that included .fork
+           left.compute();
+           middle.compute();
+           right.compute();
+        }
     }
 
 
     /**
-     * Split the array between indices i and j according to the pivot index p.
-     * After this operation, the index m is returned such that all values at indices i...m-1 are
-     * <= pivot, a[m] = pivot, and all values at indices m+1...j are > pivot.
-     * @param a the input array to be split
-     * @param i the starting index
-     * @param j the ending index
-     * @param pIndex the index of the pivot value
+     * Split the array into according to the pivot indices low and high.
+     * After this operation, the indices a and b are returned
+     * such that all values at indices i...a-1 are <= pivotOne,
+     * all values at indices a ... b are between pivotOne and pivotTwo
+     * and all values at indices b+1...j are > pivotTwo.
+     * @param arr the input array to be split
+     * @param low the starting index
+     * @param high the ending index
      */
-    public static int split(float[] a, int i, int j, int pIndex) {
-        float pivot = a[pIndex];
-        // move pivot to right-most index
-        swap(a, pIndex, j);
-        // the largest index of values <= pivot
-        int small = i - 1;
-        // values between small and cur are > pivot
-        for (int cur = i; cur <= j; cur++) {
-            if (a[cur] <= pivot) {
-                small++;
-                swap(a,small,cur);
+    public static int[] split(float[] arr, int low, int high) {
+        // If the first element in the range is greater than the last element, swap them
+        if (arr[low] > arr[high]) swap(arr, low, high);
+
+        // Initialize pointers
+        int a = low + 1;
+        int b = high - 1;
+        int c = low + 1;
+
+        // p is the left pivot, and q is the right pivot.
+        float p = arr[low];
+        float q = arr[high];
+
+        // Partition the array
+        while (c <= b) {
+            // If the element at index c is less than the pivot p,
+            // swap it with the element at index a and increment a
+            if (arr[c] < p) {
+                swap(arr, c, a);
+                a++;
             }
+
+            // If the element at index c is greater than or equal to the pivot q,
+            // swap it with an element at index b
+            // that is less than or equal to q, then decrement b.
+            // If the swapped element is less than p, swap it with
+            // an element at index a and increment a
+            else if (arr[c] >= q) {
+                while (arr[b] > q && c < b) b--;
+                swap(arr, c, b);
+                b--;
+
+                if (arr[c] < p) {
+                    swap(arr, c, a);
+                    a++;
+                }
+            }
+            // Increment c to move to the next element to be compared
+            c++;
         }
-        // return the index of the pivot
-        return small;
+
+        // Decrement a and increment b to position them
+        // at the indices of the pivot elements
+        a--; b++;
+
+        // Bring pivots to their appropriate positions.
+        swap(arr, low, a);
+        swap(arr, high, b);
+
+        // Return an array containing the indices of the pivot elements
+        return new int[] { a, b };
     }
 
     /** Swap two elements in an array
